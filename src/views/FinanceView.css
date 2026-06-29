@@ -1,0 +1,92 @@
+.finance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+  .finance-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+.finance-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.finance-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 16px;
+  background-color: var(--surface);
+  border: 1px solid var(--surface-border);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.filter-input {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--surface-border);
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.finance-table-wrapper {
+  background-color: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.finance-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.amount-income {
+  font-weight: 700;
+  color: var(--success);
+}
+
+.amount-expense {
+  font-weight: 700;
+  color: var(--error);
+}

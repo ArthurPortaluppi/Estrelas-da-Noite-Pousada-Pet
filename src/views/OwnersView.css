@@ -1,0 +1,71 @@
+.owners-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.owners-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.owner-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.owner-contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+
+.owner-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+
+.owner-contact-item strong {
+  color: var(--text-primary);
+}
+
+.owner-pets-section {
+  border-top: 1px solid var(--surface-border);
+  padding-top: 16px;
+  margin-top: 8px;
+}
+
+.owner-pets-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.owner-pet-badge {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid rgba(var(--primary-rgb), 0.15);
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.owner-pet-badge:hover {
+  background-color: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+}

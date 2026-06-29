@@ -1,0 +1,134 @@
+.pets-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.pets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.pet-card {
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.pet-card-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background-color: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.pet-card-header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.pet-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+
+.pet-info-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Modal de Detalhes do Pet */
+.pet-details-header {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.pet-details-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  background-color: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.5rem;
+}
+
+/* Carteira de Vacinas e Tabelas */
+.vaccine-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.vaccine-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: var(--background);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+}
+
+.vaccine-item:hover {
+  border-color: rgba(var(--primary-rgb), 0.25);
+}
+
+.vaccine-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vaccine-dates {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.service-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.service-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  background-color: var(--surface-hover);
+}
+
+.add-inline-form {
+  background-color: var(--background);
+  border: 1px solid var(--surface-border);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  margin-top: 16px;
+}

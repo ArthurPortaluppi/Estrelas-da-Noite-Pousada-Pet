@@ -7,12 +7,118 @@ import {
   ArrowUpRight, 
   ArrowDownRight,
   TrendingUp,
-  Calendar
+  Calendar,
+  X
 } from "lucide-react";
+import confetti from "canvas-confetti";
 import "./DashboardView.css";
 import { formatDate } from "../utils/helpers";
 
-export default function DashboardView({ pets, owners, transactions, onNavigateToTab }) {
+export default function DashboardView({ pets, owners, transactions, onNavigateToTab, onUpdatePet, onAddServiceTransaction }) {
+  // Estados para o Modal de Agendamento Rápido
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [selectedPetId, setSelectedPetId] = useState("");
+  const [checkIn, setCheckIn] = useState("2026-06-23");
+  const [checkOut, setCheckOut] = useState("2026-06-25");
+  const [pricePerNight, setPricePerNight] = useState("80");
+  const [hasBanho, setHasBanho] = useState(false);
+  const [banhoPrice, setBanhoPrice] = useState("50");
+  const [hasTosa, setHasTosa] = useState(false);
+  const [tosaPrice, setTosaPrice] = useState("80");
+  const [hasTosaHigienica, setHasTosaHigienica] = useState(false);
+  const [tosaHigienicaPrice, setTosaHigienicaPrice] = useState("40");
+  const [srvNotes, setSrvNotes] = useState("");
+
+  const calculateNights = (inDate, outDate) => {
+    if (!inDate || !outDate) return 0;
+    const d1 = new Date(inDate);
+    const d2 = new Date(outDate);
+    const diff = d2 - d1;
+    if (diff <= 0) return 0;
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
+
+  const currentNights = calculateNights(checkIn, checkOut);
+  const lodgingTotal = currentNights * parseFloat(pricePerNight || 0);
+  const extrasTotal = 
+    (hasBanho ? parseFloat(banhoPrice || 0) : 0) +
+    (hasTosa ? parseFloat(tosaPrice || 0) : 0) +
+    (hasTosaHigienica ? parseFloat(tosaHigienicaPrice || 0) : 0);
+  const totalPrice = lodgingTotal + extrasTotal;
+
+  const handleScheduleSubmit = (e) => {
+    e.preventDefault();
+    if (!selectedPetId) {
+      alert("Por favor, selecione um pet.");
+      return;
+    }
+    if (!checkIn || !checkOut || currentNights <= 0) {
+      alert("Selecione datas de check-in e check-out válidas (mínimo de 1 diária).");
+      return;
+    }
+
+    const selectedPet = pets.find(p => p.id === selectedPetId);
+    if (!selectedPet) {
+      alert("Pet não encontrado.");
+      return;
+    }
+
+    const selectedExtras = [
+      hasBanho && { name: "Banho", price: parseFloat(banhoPrice) },
+      hasTosa && { name: "Tosa", price: parseFloat(tosaPrice) },
+      hasTosaHigienica && { name: "Tosa Higiênica", price: parseFloat(tosaHigienicaPrice) }
+    ].filter(Boolean);
+
+    const newLodging = {
+      id: `srv-${Date.now()}`,
+      type: "Hospedagem",
+      checkIn,
+      checkOut,
+      nights: currentNights,
+      pricePerNight: parseFloat(pricePerNight),
+      extras: selectedExtras,
+      price: totalPrice,
+      notes: srvNotes || "Estadia padrão."
+    };
+
+    const updatedPet = {
+      ...selectedPet,
+      servicesHistory: [newLodging, ...(selectedPet.servicesHistory || [])]
+    };
+
+    onUpdatePet(updatedPet);
+
+    const extrasDesc = selectedExtras.length > 0 
+      ? ` + ${selectedExtras.map(e => e.name).join(", ")}` 
+      : "";
+
+    onAddServiceTransaction({
+      petId: selectedPet.id,
+      type: "income",
+      amount: totalPrice,
+      category: "Hospedagem",
+      date: checkIn,
+      description: `Hospedagem ${selectedPet.name} - ${currentNights} diárias${extrasDesc}`
+    });
+
+    setIsScheduleModalOpen(false);
+    setSelectedPetId("");
+    setCheckIn("2026-06-23");
+    setCheckOut("2026-06-25");
+    setPricePerNight("80");
+    setHasBanho(false);
+    setHasTosa(false);
+    setHasTosaHigienica(false);
+    setSrvNotes("");
+
+    confetti({
+      particleCount: 50,
+      spread: 40,
+      colors: ["#7c3aed", "#06b6d4", "#ec4899"],
+      origin: { y: 0.7 }
+    });
+  };
+
   // 1. Filtrar Transações de Junho 2026 (Mês Atual)
   const currentMonthStr = "2026-06";
   const currentTransactions = transactions.filter(t => t.date.startsWith(currentMonthStr));
@@ -113,8 +219,18 @@ export default function DashboardView({ pets, owners, transactions, onNavigateTo
           <h1>Estrelas da Noite - Pousada Pet 🌟🐾</h1>
           <p>Painel de controle e faturamento das hospedagens dos pets.</p>
         </div>
-        <div className="badge badge-primary" style={{ padding: "8px 16px" }}>
-          Junho / 2026
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <button 
+            className="btn btn-primary" 
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+            onClick={() => setIsScheduleModalOpen(true)}
+          >
+            <Calendar size={18} />
+            Agendar Hospedagem
+          </button>
+          <div className="badge badge-primary" style={{ padding: "8px 16px" }}>
+            Junho / 2026
+          </div>
         </div>
       </div>
 
@@ -331,6 +447,182 @@ export default function DashboardView({ pets, owners, transactions, onNavigateTo
           </div>
         </div>
       </div>
+      {/* Modal de Agendamento Rápido */}
+      {isScheduleModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: "600px" }}>
+            <div className="modal-header">
+              <h2>Novo Agendamento de Hospedagem 📅</h2>
+              <button className="btn-icon" onClick={() => setIsScheduleModalOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleScheduleSubmit}>
+              <div className="modal-body">
+                
+                <div className="form-group">
+                  <label className="form-label">Selecionar Pet *</label>
+                  <select 
+                    className="form-control form-select"
+                    value={selectedPetId}
+                    onChange={(e) => setSelectedPetId(e.target.value)}
+                    required
+                  >
+                    <option value="">Selecione o Pet...</option>
+                    {pets.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({p.species} - {p.breed})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid-cols-2">
+                  <div className="form-group">
+                    <label className="form-label">Check-in *</label>
+                    <input 
+                      type="date" 
+                      className="form-control"
+                      value={checkIn}
+                      onChange={(e) => setCheckIn(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Check-out *</label>
+                    <input 
+                      type="date" 
+                      className="form-control"
+                      value={checkOut}
+                      onChange={(e) => setCheckOut(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid-cols-2">
+                  <div className="form-group">
+                    <label className="form-label">Preço por Diária (R$) *</label>
+                    <input 
+                      type="number" 
+                      className="form-control"
+                      value={pricePerNight}
+                      onChange={(e) => setPricePerNight(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group" style={{ display: "flex", alignItems: "flex-end", paddingBottom: "10px" }}>
+                    <span style={{ fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: "500" }}>
+                      Total de diárias: <strong>{currentNights}</strong>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Serviços Extras */}
+                <h4 className="mt-4 mb-2">Serviços Adicionais</h4>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px", backgroundColor: "var(--background)", borderRadius: "8px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", userSelect: "none" }}>
+                      <input 
+                        type="checkbox" 
+                        checked={hasBanho}
+                        onChange={(e) => setHasBanho(e.target.checked)}
+                      />
+                      <span>Banho</span>
+                    </label>
+                    {hasBanho && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>R$</span>
+                        <input 
+                          type="number" 
+                          className="form-control" 
+                          style={{ width: "80px", padding: "4px 8px", height: "auto" }}
+                          value={banhoPrice}
+                          onChange={(e) => setBanhoPrice(e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", userSelect: "none" }}>
+                      <input 
+                        type="checkbox" 
+                        checked={hasTosa}
+                        onChange={(e) => setHasTosa(e.target.checked)}
+                      />
+                      <span>Tosa</span>
+                    </label>
+                    {hasTosa && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>R$</span>
+                        <input 
+                          type="number" 
+                          className="form-control" 
+                          style={{ width: "80px", padding: "4px 8px", height: "auto" }}
+                          value={tosaPrice}
+                          onChange={(e) => setTosaPrice(e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", userSelect: "none" }}>
+                      <input 
+                        type="checkbox" 
+                        checked={hasTosaHigienica}
+                        onChange={(e) => setHasTosaHigienica(e.target.checked)}
+                      />
+                      <span>Tosa Higiênica</span>
+                    </label>
+                    {hasTosaHigienica && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>R$</span>
+                        <input 
+                          type="number" 
+                          className="form-control" 
+                          style={{ width: "80px", padding: "4px 8px", height: "auto" }}
+                          value={tosaHigienicaPrice}
+                          onChange={(e) => setTosaHigienicaPrice(e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="form-group mt-4">
+                  <label className="form-label">Observações da Hospedagem</label>
+                  <textarea 
+                    className="form-control" 
+                    rows="2"
+                    placeholder="Instruções de alimentação, medicamentos, comportamento, etc."
+                    value={srvNotes}
+                    onChange={(e) => setSrvNotes(e.target.value)}
+                  ></textarea>
+                </div>
+
+                {/* Resumo de Custos */}
+                <div className="card mt-4" style={{ backgroundColor: "var(--primary-light)", borderColor: "var(--primary)", padding: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontWeight: "600", color: "var(--text-primary)" }}>Valor Total:</span>
+                  <span style={{ fontSize: "1.2rem", fontWeight: "700", color: "var(--primary)" }}>
+                    R$ {totalPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsScheduleModalOpen(false)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Confirmar Agendamento
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -134,6 +134,8 @@ export default function App() {
             owners={owners} 
             transactions={transactions} 
             onNavigateToTab={setActiveTab}
+            onUpdatePet={handleUpdatePet}
+            onAddServiceTransaction={handleAddServiceTransaction}
           />
         )}
 

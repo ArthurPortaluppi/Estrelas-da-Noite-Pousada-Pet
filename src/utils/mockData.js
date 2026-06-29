@@ -57,6 +57,7 @@ export const INITIAL_PETS = [
     weight: "32.5 kg",
     ownerId: "owner-1",
     notes: "Adora brincar no gramado com bolinhas. Alérgico a corante vermelho.",
+    authorizedPickups: "Beatriz Portaluppi (Irmã), Mariana Silva",
     vaccines: [
       {
         id: "vac-1-1",
@@ -114,6 +115,7 @@ export const INITIAL_PETS = [
     weight: "4.1 kg",
     ownerId: "owner-2",
     notes: "Assustada com barulho alto. Prefere ficar no chalé individual de felinos.",
+    authorizedPickups: "Roberto Costa (Pai)",
     vaccines: [
       {
         id: "vac-2-1",
@@ -157,6 +159,7 @@ export const INITIAL_PETS = [
     weight: "12.8 kg",
     ownerId: "owner-3",
     notes: "Possui dermatite atópica. Usar apenas shampoo especial do cliente no banho extra.",
+    authorizedPickups: "Clara Souza (Esposa)",
     vaccines: [
       {
         id: "vac-3-1",
@@ -193,6 +196,7 @@ export const INITIAL_PETS = [
     weight: "95 g",
     ownerId: "owner-4",
     notes: "Hospedada na gaiola individual. Super mansa, assobia bastante.",
+    authorizedPickups: "Lucas Mendes (Irmão)",
     vaccines: [],
     servicesHistory: [
       { 
@@ -217,6 +221,7 @@ export const INITIAL_PETS = [
     weight: "4.8 kg",
     ownerId: "owner-1",
     notes: "Adora janelas com tela e caminhar nas prateleiras dos felinos.",
+    authorizedPickups: "Beatriz Portaluppi (Irmã)",
     vaccines: [
       {
         id: "vac-5-1",

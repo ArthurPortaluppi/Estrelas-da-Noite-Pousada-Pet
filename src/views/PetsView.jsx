@@ -58,6 +58,7 @@ export default function PetsView({
   const [petWeight, setPetWeight] = useState("");
   const [petOwnerId, setPetOwnerId] = useState("");
   const [petNotes, setPetNotes] = useState("");
+  const [petAuthorizedPickups, setPetAuthorizedPickups] = useState("");
 
   // Formulário para Nova Vacina (dentro do prontuário)
   const [isAddingVaccine, setIsAddingVaccine] = useState(false);
@@ -127,6 +128,7 @@ export default function PetsView({
       weight: petWeight ? `${petWeight} kg` : "N/A",
       ownerId: petOwnerId,
       notes: petNotes,
+      authorizedPickups: petAuthorizedPickups || "Apenas o tutor",
       vaccines: [],
       servicesHistory: []
     };
@@ -142,6 +144,7 @@ export default function PetsView({
     setPetWeight("");
     setPetOwnerId("");
     setPetNotes("");
+    setPetAuthorizedPickups("");
   };
 
   // Adicionar Vacina no Pet Selecionado
@@ -517,6 +520,17 @@ export default function PetsView({
                     onChange={(e) => setPetNotes(e.target.value)}
                   ></textarea>
                 </div>
+
+                <div className="form-group">
+                  <label className="form-label">Pessoas Autorizadas a Retirar</label>
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    placeholder="Ex: Beatriz Portaluppi (Irmã), Mariana Silva (Mãe)"
+                    value={petAuthorizedPickups} 
+                    onChange={(e) => setPetAuthorizedPickups(e.target.value)} 
+                  />
+                </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setIsAddPetModalOpen(false)}>
@@ -640,6 +654,13 @@ export default function PetsView({
                   <div className="card mt-2" style={{ borderColor: "var(--warning)" }}>
                     <p style={{ fontStyle: selectedPet.notes ? "normal" : "italic", color: selectedPet.notes ? "var(--text-primary)" : "var(--text-muted)" }}>
                       {selectedPet.notes || "Nenhuma observação cadastrada."}
+                    </p>
+                  </div>
+
+                  <h3 className="mt-4">Retirada / Pessoas Autorizadas</h3>
+                  <div className="card mt-2" style={{ borderColor: "var(--primary)" }}>
+                    <p style={{ fontWeight: 500, color: "var(--text-primary)" }}>
+                      {selectedPet.authorizedPickups || "Apenas o tutor"}
                     </p>
                   </div>
 

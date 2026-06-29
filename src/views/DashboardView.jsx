@@ -158,17 +158,8 @@ export default function DashboardView({ pets, owners, transactions, onNavigateTo
     }
   });
 
-  // 4. Contar Vacinas Atrasadas ou Pendentes
-  let overdueVaccines = 0;
-  let pendingVaccines = 0;
-  pets.forEach(pet => {
-    if (pet.vaccines) {
-      pet.vaccines.forEach(vac => {
-        if (vac.status === "overdue") overdueVaccines++;
-        if (vac.status === "pending") pendingVaccines++;
-      });
-    }
-  });
+  // 4. Contar Pets sem Carteira de Vacinação
+  const petsWithoutCardCount = pets.filter(pet => !pet.hasVaccinationCard).length;
 
   // 5. Processar Histórico de Hospedagens Recentes dos Pets
   const allLodgings = [];
@@ -275,16 +266,16 @@ export default function DashboardView({ pets, owners, transactions, onNavigateTo
         </div>
 
         <div className="card metric-card" onClick={() => onNavigateToTab("pets")} style={{ cursor: "pointer" }}>
-          <div className="metric-icon-wrapper" style={{ backgroundColor: "var(--error-light)", color: "var(--error)" }}>
+          <div className="metric-icon-wrapper" style={{ backgroundColor: petsWithoutCardCount > 0 ? "var(--error-light)" : "var(--success-light)", color: petsWithoutCardCount > 0 ? "var(--error)" : "var(--success)" }}>
             <ShieldAlert size={24} />
           </div>
           <div>
-            <span className="metric-label">Vacinas Críticas</span>
-            <div className="metric-value" style={{ color: overdueVaccines > 0 ? "var(--error)" : "var(--text-primary)" }}>
-              {overdueVaccines} Atrasadas
+            <span className="metric-label">Sem Carteira</span>
+            <div className="metric-value" style={{ color: petsWithoutCardCount > 0 ? "var(--error)" : "var(--text-primary)" }}>
+              {petsWithoutCardCount} {petsWithoutCardCount === 1 ? "Pet" : "Pets"}
             </div>
-            <span className="metric-label mt-2" style={{ display: "block", fontSize: "0.75rem", color: "var(--warning)" }}>
-              Controle de saúde obrigatório
+            <span className="metric-label mt-2" style={{ display: "block", fontSize: "0.75rem", color: petsWithoutCardCount > 0 ? "var(--warning)" : "var(--text-muted)" }}>
+              Apresentação obrigatória
             </span>
           </div>
         </div>

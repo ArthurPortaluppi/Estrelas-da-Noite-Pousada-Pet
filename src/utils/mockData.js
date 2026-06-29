@@ -58,24 +58,7 @@ export const INITIAL_PETS = [
     ownerId: "owner-1",
     notes: "Adora brincar no gramado com bolinhas. Alérgico a corante vermelho.",
     authorizedPickups: "Beatriz Portaluppi (Irmã), Mariana Silva",
-    vaccines: [
-      {
-        id: "vac-1-1",
-        name: "Antirrábica",
-        dateAdministered: "2025-08-10",
-        nextDoseDue: "2026-08-10",
-        status: "up_to_date",
-        manufacturer: "Zoetis (Defensor)"
-      },
-      {
-        id: "vac-1-2",
-        name: "V10 (Múltipla)",
-        dateAdministered: "2025-06-15",
-        nextDoseDue: "2026-06-15",
-        status: "overdue",
-        manufacturer: "MSD (Nobivac)"
-      }
-    ],
+    hasVaccinationCard: true,
     servicesHistory: [
       { 
         id: "srv-1", 
@@ -116,24 +99,7 @@ export const INITIAL_PETS = [
     ownerId: "owner-2",
     notes: "Assustada com barulho alto. Prefere ficar no chalé individual de felinos.",
     authorizedPickups: "Roberto Costa (Pai)",
-    vaccines: [
-      {
-        id: "vac-2-1",
-        name: "Antirrábica",
-        dateAdministered: "2025-05-20",
-        nextDoseDue: "2026-05-20",
-        status: "overdue",
-        manufacturer: "Zoetis"
-      },
-      {
-        id: "vac-2-2",
-        name: "Quádrupla Felina (V4)",
-        dateAdministered: "2025-07-22",
-        nextDoseDue: "2026-07-22",
-        status: "pending",
-        manufacturer: "MSD"
-      }
-    ],
+    hasVaccinationCard: true,
     servicesHistory: [
       { 
         id: "srv-3", 
@@ -160,16 +126,7 @@ export const INITIAL_PETS = [
     ownerId: "owner-3",
     notes: "Possui dermatite atópica. Usar apenas shampoo especial do cliente no banho extra.",
     authorizedPickups: "Clara Souza (Esposa)",
-    vaccines: [
-      {
-        id: "vac-3-1",
-        name: "Antirrábica",
-        dateAdministered: "2025-11-12",
-        nextDoseDue: "2026-11-12",
-        status: "up_to_date",
-        manufacturer: "Zoetis"
-      }
-    ],
+    hasVaccinationCard: true,
     servicesHistory: [
       { 
         id: "srv-4", 
@@ -197,7 +154,7 @@ export const INITIAL_PETS = [
     ownerId: "owner-4",
     notes: "Hospedada na gaiola individual. Super mansa, assobia bastante.",
     authorizedPickups: "Lucas Mendes (Irmão)",
-    vaccines: [],
+    hasVaccinationCard: false,
     servicesHistory: [
       { 
         id: "srv-5", 
@@ -222,16 +179,7 @@ export const INITIAL_PETS = [
     ownerId: "owner-1",
     notes: "Adora janelas com tela e caminhar nas prateleiras dos felinos.",
     authorizedPickups: "Beatriz Portaluppi (Irmã)",
-    vaccines: [
-      {
-        id: "vac-5-1",
-        name: "Tríplice Felina (V3)",
-        dateAdministered: "2026-01-20",
-        nextDoseDue: "2027-01-20",
-        status: "up_to_date",
-        manufacturer: "Boehringer"
-      }
-    ],
+    hasVaccinationCard: true,
     servicesHistory: [
       { 
         id: "srv-6", 

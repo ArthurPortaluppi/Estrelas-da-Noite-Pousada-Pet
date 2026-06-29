@@ -6,7 +6,6 @@ import {
   HeartPulse, 
   Calendar, 
   FileText, 
-  Syringe, 
   Scissors, 
   Weight, 
   Check, 
@@ -59,13 +58,7 @@ export default function PetsView({
   const [petOwnerId, setPetOwnerId] = useState("");
   const [petNotes, setPetNotes] = useState("");
   const [petAuthorizedPickups, setPetAuthorizedPickups] = useState("");
-
-  // Formulário para Nova Vacina (dentro do prontuário)
-  const [isAddingVaccine, setIsAddingVaccine] = useState(false);
-  const [vacName, setVacName] = useState("");
-  const [vacManufacturer, setVacManufacturer] = useState("");
-  const [vacAdminDate, setVacAdminDate] = useState("");
-  const [vacDueDate, setVacDueDate] = useState("");
+  const [petHasVaccinationCard, setPetHasVaccinationCard] = useState(true);
 
   // Formulário para Nova Hospedagem (dentro do prontuário)
   const [isAddingService, setIsAddingService] = useState(false);
@@ -83,13 +76,7 @@ export default function PetsView({
   
   const [srvNotes, setSrvNotes] = useState("");
 
-  // Helper: Obter status consolidado de vacinação do Pet
-  const getPetVaccineStatus = (pet) => {
-    if (!pet.vaccines || pet.vaccines.length === 0) return "up_to_date";
-    if (pet.vaccines.some(v => v.status === "overdue")) return "overdue";
-    if (pet.vaccines.some(v => v.status === "pending")) return "pending";
-    return "up_to_date";
-  };
+
 
   // Helper: Obter Nome do Dono
   const getOwnerName = (ownerId) => {
@@ -99,15 +86,17 @@ export default function PetsView({
 
   // Filtros
   const filteredPets = pets.filter(pet => {
-    const ownerName = getOwnerName(pet.ownerId).toLowerCase();
-    const matchesSearch = pet.name.toLowerCase().includes(search.toLowerCase()) ||
+    const matchesSearch = 
+      pet.name.toLowerCase().includes(search.toLowerCase()) ||
       pet.breed.toLowerCase().includes(search.toLowerCase()) ||
-      ownerName.includes(search.toLowerCase());
-
+      getOwnerName(pet.ownerId).toLowerCase().includes(search.toLowerCase());
+      
     const matchesSpecies = speciesFilter === "All" || pet.species === speciesFilter;
     
-    const vacStatus = getPetVaccineStatus(pet);
-    const matchesVacStatus = vaccineStatusFilter === "All" || vacStatus === vaccineStatusFilter;
+    const matchesVacStatus = 
+      vaccineStatusFilter === "All" || 
+      (vaccineStatusFilter === "yes" && pet.hasVaccinationCard) || 
+      (vaccineStatusFilter === "no" && !pet.hasVaccinationCard);
 
     return matchesSearch && matchesSpecies && matchesVacStatus;
   });
@@ -129,7 +118,7 @@ export default function PetsView({
       ownerId: petOwnerId,
       notes: petNotes,
       authorizedPickups: petAuthorizedPickups || "Apenas o tutor",
-      vaccines: [],
+      hasVaccinationCard: petHasVaccinationCard,
       servicesHistory: []
     };
 
@@ -145,73 +134,10 @@ export default function PetsView({
     setPetOwnerId("");
     setPetNotes("");
     setPetAuthorizedPickups("");
+    setPetHasVaccinationCard(true);
   };
 
-  // Adicionar Vacina no Pet Selecionado
-  const handleAddVaccineSubmit = (e) => {
-    e.preventDefault();
-    if (!vacName || !vacAdminDate || !vacDueDate) {
-      alert("Preencha todos os campos da vacina.");
-      return;
-    }
 
-    // Determinar status da vacina baseado na data de vencimento em relação a hoje (23/06/2026)
-    const today = new Date("2026-06-23");
-    const dueDate = new Date(vacDueDate);
-    let status = "up_to_date";
-    
-    if (dueDate < today) {
-      status = "overdue";
-    } else {
-      // Se vence em menos de 30 dias
-      const diffTime = Math.abs(dueDate - today);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      if (diffDays <= 30) {
-        status = "pending";
-      }
-    }
-
-    const newVac = {
-      id: `vac-${Date.now()}`,
-      name: vacName,
-      dateAdministered: vacAdminDate,
-      nextDoseDue: vacDueDate,
-      status,
-      manufacturer: vacManufacturer || "Não especificado"
-    };
-
-    const updatedPet = {
-      ...selectedPet,
-      vaccines: [...(selectedPet.vaccines || []), newVac]
-    };
-
-    onUpdatePet(updatedPet);
-    setSelectedPet(updatedPet); // Atualiza modal ativo
-    setIsAddingVaccine(false);
-
-    // Celebrar!
-    confetti({
-      particleCount: 80,
-      spread: 60,
-      origin: { y: 0.7 }
-    });
-
-    // Resetar campos
-    setVacName("");
-    setVacManufacturer("");
-    setVacAdminDate("");
-    setVacDueDate("");
-  };
-
-  // Excluir Vacina
-  const handleDeleteVaccine = (vacId) => {
-    const updatedPet = {
-      ...selectedPet,
-      vaccines: selectedPet.vaccines.filter(v => v.id !== vacId)
-    };
-    onUpdatePet(updatedPet);
-    setSelectedPet(updatedPet);
-  };
 
   // Helper de cálculo de diárias e totais
   const calculateNights = (inDate, outDate) => {
@@ -349,16 +275,15 @@ export default function PetsView({
         </div>
 
         <div className="filter-group">
-          <span className="filter-label">Status Sanitário</span>
+          <span className="filter-label">Carteira de Vacinação</span>
           <select 
             className="form-control filter-input form-select"
             value={vaccineStatusFilter}
             onChange={(e) => setVaccineStatusFilter(e.target.value)}
           >
             <option value="All">Todos</option>
-            <option value="up_to_date">Vacinas em Dia</option>
-            <option value="pending">Vencendo Logo</option>
-            <option value="overdue">Vacinas Atrasadas</option>
+            <option value="yes">Acompanha Carteira</option>
+            <option value="no">Não Acompanha</option>
           </select>
         </div>
       </div>
@@ -371,7 +296,6 @@ export default function PetsView({
           </div>
         ) : (
           filteredPets.map(pet => {
-            const vacStatus = getPetVaccineStatus(pet);
             return (
               <div 
                 key={pet.id} 
@@ -409,10 +333,12 @@ export default function PetsView({
                 </div>
 
                 <div style={{ marginTop: "16px", borderTop: "1px solid var(--surface-border)", paddingTop: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span className="filter-label" style={{ margin: 0 }}>Vacinação:</span>
-                  {vacStatus === "up_to_date" && <span className="badge badge-success">Em Dia</span>}
-                  {vacStatus === "pending" && <span className="badge badge-warning">Pendente</span>}
-                  {vacStatus === "overdue" && <span className="badge badge-error">Atrasado</span>}
+                  <span className="filter-label" style={{ margin: 0 }}>Carteira de Vacinação:</span>
+                  {pet.hasVaccinationCard ? (
+                    <span className="badge badge-success">Acompanha</span>
+                  ) : (
+                    <span className="badge badge-error">Não Acompanha</span>
+                  )}
                 </div>
               </div>
             );
@@ -521,15 +447,28 @@ export default function PetsView({
                   ></textarea>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Pessoas Autorizadas a Retirar</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
-                    placeholder="Ex: Beatriz Portaluppi (Irmã), Mariana Silva (Mãe)"
-                    value={petAuthorizedPickups} 
-                    onChange={(e) => setPetAuthorizedPickups(e.target.value)} 
-                  />
+                <div className="grid-cols-2">
+                  <div className="form-group">
+                    <label className="form-label">Acompanha Carteira de Vacinação?</label>
+                    <select 
+                      className="form-control form-select"
+                      value={petHasVaccinationCard ? "yes" : "no"}
+                      onChange={(e) => setPetHasVaccinationCard(e.target.value === "yes")}
+                    >
+                      <option value="yes">Sim</option>
+                      <option value="no">Não</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Pessoas Autorizadas a Retirar</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      placeholder="Ex: Beatriz Portaluppi (Irmã), Mariana Silva (Mãe)"
+                      value={petAuthorizedPickups} 
+                      onChange={(e) => setPetAuthorizedPickups(e.target.value)} 
+                    />
+                  </div>
                 </div>
               </div>
               <div className="modal-footer">
@@ -561,7 +500,6 @@ export default function PetsView({
               </div>
               <button className="btn-icon" onClick={() => {
                 setSelectedPet(null);
-                setIsAddingVaccine(false);
                 setIsAddingService(false);
               }}>
                 <X size={20} />
@@ -578,13 +516,7 @@ export default function PetsView({
                   <FileText size={16} style={{ marginRight: "4px", verticalAlign: "middle" }} />
                   Ficha Clínica
                 </button>
-                <button 
-                  className={`tab-btn ${activeDetailTab === "vacinas" ? "active" : ""}`}
-                  onClick={() => setActiveDetailTab("vacinas")}
-                >
-                  <Syringe size={16} style={{ marginRight: "4px", verticalAlign: "middle" }} />
-                  Carteira de Vacinação
-                </button>
+
                 <button 
                   className={`tab-btn ${activeDetailTab === "servicos" ? "active" : ""}`}
                   onClick={() => setActiveDetailTab("servicos")}
@@ -609,6 +541,11 @@ export default function PetsView({
                       <span className="filter-label mt-4">Idade / Peso</span>
                       <p style={{ fontWeight: 600, color: "var(--text-primary)" }}>
                         {selectedPet.age} • <Weight size={14} style={{ verticalAlign: "middle", margin: "0 2px" }} /> {selectedPet.weight}
+                      </p>
+
+                      <span className="filter-label mt-4">Carteira de Vacinação</span>
+                      <p style={{ fontWeight: 600, color: selectedPet.hasVaccinationCard ? "var(--success)" : "var(--error)" }}>
+                        {selectedPet.hasVaccinationCard ? "✓ Acompanha" : "✗ Não acompanha"}
                       </p>
                     </div>
 
@@ -681,125 +618,7 @@ export default function PetsView({
                 </div>
               )}
 
-              {/* ABA 2: CARTEIRA DE VACINAÇÃO */}
-              {activeDetailTab === "vacinas" && (
-                <div className="slide-up">
-                  <div className="flex-between">
-                    <h3>Registro de Imunização</h3>
-                    {!isAddingVaccine && (
-                      <button className="btn btn-primary" onClick={() => setIsAddingVaccine(true)} style={{ padding: "6px 12px", fontSize: "0.8rem" }}>
-                        <Plus size={14} /> Registrar Vacina
-                      </button>
-                    )}
-                  </div>
 
-                  {/* Form de Nova Vacina Inline */}
-                  {isAddingVaccine && (
-                    <form onSubmit={handleAddVaccineSubmit} className="add-inline-form slide-up">
-                      <h4 className="mb-4">Adicionar Aplicação</h4>
-                      
-                      <div className="grid-cols-2">
-                        <div className="form-group">
-                          <label className="form-label">Nome da Vacina *</label>
-                          <input 
-                            type="text" 
-                            className="form-control" 
-                            placeholder="Ex: V10, Antirrábica, V5"
-                            value={vacName}
-                            onChange={(e) => setVacName(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Fabricante / Laboratório</label>
-                          <input 
-                            type="text" 
-                            className="form-control" 
-                            placeholder="Ex: Zoetis, MSD"
-                            value={vacManufacturer}
-                            onChange={(e) => setVacManufacturer(e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid-cols-2">
-                        <div className="form-group">
-                          <label className="form-label">Data da Dose *</label>
-                          <input 
-                            type="date" 
-                            className="form-control" 
-                            value={vacAdminDate}
-                            onChange={(e) => setVacAdminDate(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Próxima Dose *</label>
-                          <input 
-                            type="date" 
-                            className="form-control" 
-                            value={vacDueDate}
-                            onChange={(e) => setVacDueDate(e.target.value)}
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "12px" }}>
-                        <button type="button" className="btn btn-secondary" style={{ padding: "6px 12px" }} onClick={() => setIsAddingVaccine(false)}>
-                          Cancelar
-                        </button>
-                        <button type="submit" className="btn btn-primary" style={{ padding: "6px 12px" }}>
-                          Salvar Aplicação
-                        </button>
-                      </div>
-                    </form>
-                  )}
-
-                  {/* Listagem de Vacinas */}
-                  <div className="vaccine-list">
-                    {!selectedPet.vaccines || selectedPet.vaccines.length === 0 ? (
-                      <p style={{ textAlign: "center", padding: "30px", color: "var(--text-muted)", fontStyle: "italic" }}>
-                        Nenhuma vacina aplicada registrada para este pet.
-                      </p>
-                    ) : (
-                      selectedPet.vaccines.map(vac => (
-                        <div key={vac.id} className="vaccine-item">
-                          <div className="vaccine-main-info">
-                            <h4 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                              <HeartPulse size={16} style={{ color: "var(--primary)" }} />
-                              {vac.name} 
-                              <span style={{ fontSize: "0.75rem", fontWeight: "normal", color: "var(--text-secondary)" }}>
-                                ({vac.manufacturer})
-                              </span>
-                            </h4>
-                            <div className="vaccine-dates">
-                              <span>Aplicada: <strong>{formatDate(vac.dateAdministered)}</strong></span>
-                              <span style={{ margin: "0 8px" }}>•</span>
-                              <span>Vence: <strong>{formatDate(vac.nextDoseDue)}</strong></span>
-                            </div>
-                          </div>
-
-                          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                            {vac.status === "up_to_date" && <span className="badge badge-success">Válida</span>}
-                            {vac.status === "pending" && <span className="badge badge-warning">Pendente</span>}
-                            {vac.status === "overdue" && <span className="badge badge-error">Vencida</span>}
-
-                            <button 
-                              type="button" 
-                              className="btn-icon" 
-                              style={{ color: "var(--error)" }}
-                              onClick={() => handleDeleteVaccine(vac.id)}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
 
               {/* ABA 3: HISTÓRICO DE HOSPEDAGENS */}
               {activeDetailTab === "servicos" && (

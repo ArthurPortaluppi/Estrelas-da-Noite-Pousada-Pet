@@ -14,23 +14,23 @@ import {
 export default function App() {
   // 1. Estado Centralizado da Aplicação
   const [pets, setPets] = useState(() => {
-    const saved = localStorage.getItem("petshophub_pets");
+    const saved = localStorage.getItem("estrelas_da_noite_pets");
     return saved ? JSON.parse(saved) : INITIAL_PETS;
   });
 
   const [owners, setOwners] = useState(() => {
-    const saved = localStorage.getItem("petshophub_owners");
+    const saved = localStorage.getItem("estrelas_da_noite_owners");
     return saved ? JSON.parse(saved) : INITIAL_OWNERS;
   });
 
   const [transactions, setTransactions] = useState(() => {
-    const saved = localStorage.getItem("petshophub_transactions");
+    const saved = localStorage.getItem("estrelas_da_noite_transactions");
     return saved ? JSON.parse(saved) : INITIAL_TRANSACTIONS;
   });
 
   const [activeTab, setActiveTab] = useState("dashboard");
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("petshophub_theme") || "light";
+    return localStorage.getItem("estrelas_da_noite_theme") || "light";
   });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -38,19 +38,19 @@ export default function App() {
 
   // 2. Persistência de Dados
   useEffect(() => {
-    localStorage.setItem("petshophub_pets", JSON.stringify(pets));
+    localStorage.setItem("estrelas_da_noite_pets", JSON.stringify(pets));
   }, [pets]);
 
   useEffect(() => {
-    localStorage.setItem("petshophub_owners", JSON.stringify(owners));
+    localStorage.setItem("estrelas_da_noite_owners", JSON.stringify(owners));
   }, [owners]);
 
   useEffect(() => {
-    localStorage.setItem("petshophub_transactions", JSON.stringify(transactions));
+    localStorage.setItem("estrelas_da_noite_transactions", JSON.stringify(transactions));
   }, [transactions]);
 
   useEffect(() => {
-    localStorage.setItem("petshophub_theme", theme);
+    localStorage.setItem("estrelas_da_noite_theme", theme);
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
